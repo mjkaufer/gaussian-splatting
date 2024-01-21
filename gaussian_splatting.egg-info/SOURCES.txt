@@ -1,0 +1,13 @@
+LICENSE.md
+README.md
+convert.py
+full_eval.py
+metrics.py
+render.py
+setup.py
+train.py
+gaussian_splatting.egg-info/PKG-INFO
+gaussian_splatting.egg-info/SOURCES.txt
+gaussian_splatting.egg-info/dependency_links.txt
+gaussian_splatting.egg-info/requires.txt
+gaussian_splatting.egg-info/top_level.txt
