@@ -10,6 +10,7 @@
 #
 
 import os
+from typing import List, Union
 import torch
 from random import randint
 from utils.loss_utils import l1_loss, ssim
@@ -190,7 +191,7 @@ def training_report(tb_writer, iteration, Ll1, loss, l1_loss, elapsed, testing_i
             tb_writer.add_scalar('total_points', scene.gaussians.get_xyz.shape[0], iteration)
         torch.cuda.empty_cache()
 
-if __name__ == "__main__":
+def run_with_parser(input_path: Union[str, None] = None, output_: Union[str, None] = None, iterations: List[int] = [1_000, 2_000, 3_000, 4_000, 5_000]):
     # Set up command line argument parser
     parser = ArgumentParser(description="Training script parameters")
     lp = ModelParams(parser)
@@ -200,12 +201,22 @@ if __name__ == "__main__":
     parser.add_argument('--port', type=int, default=6009)
     parser.add_argument('--debug_from', type=int, default=-1)
     parser.add_argument('--detect_anomaly', action='store_true', default=False)
-    parser.add_argument("--test_iterations", nargs="+", type=int, default=[7_000, 30_000])
-    parser.add_argument("--save_iterations", nargs="+", type=int, default=[7_000, 30_000])
+    parser.add_argument("--test_iterations", nargs="+", type=int, default=iterations)
+    parser.add_argument("--save_iterations", nargs="+", type=int, default=iterations)
     parser.add_argument("--quiet", action="store_true")
     parser.add_argument("--checkpoint_iterations", nargs="+", type=int, default=[])
     parser.add_argument("--start_checkpoint", type=str, default = None)
-    args = parser.parse_args(sys.argv[1:])
+    args_list = [
+        sys.argv[1:],
+        f"-s {input_path}" if input_path else "",
+        f"-m {output_}" if output_ else "",
+    ]
+    args_str = " ".join([arg for arg in args_list if len(arg) > 0]).strip()
+
+    args = parser.parse_args(
+        args_str
+    )
+
     args.save_iterations.append(args.iterations)
     
     print("Optimizing " + args.model_path)
@@ -220,3 +231,7 @@ if __name__ == "__main__":
 
     # All done
     print("\nTraining complete.")
+
+
+if __name__ == "__main__":
+    run_with_parser()
