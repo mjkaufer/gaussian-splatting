@@ -42,6 +42,7 @@ def training(
     checkpoint,
     debug_from,
     epoch_callback,
+    background_color,
 ):
     print(
         "Iterations are", testing_iterations, saving_iterations, checkpoint_iterations
@@ -55,7 +56,11 @@ def training(
         (model_params, first_iter) = torch.load(checkpoint)
         gaussians.restore(model_params, opt)
 
-    bg_color = [1, 1, 1] if dataset.white_background else [0, 0, 0]
+    if background_color:
+        bg_color = background_color
+    else:
+        bg_color = [1, 1, 1] if dataset.white_background else [0, 0, 0]
+
     background = torch.tensor(bg_color, dtype=torch.float32, device="cuda")
 
     iter_start = torch.cuda.Event(enable_timing=True)
@@ -335,6 +340,7 @@ def run_with_parser(
     test_iterations: List[int] = None,
     # args are (file_name, epoch_num)
     epoch_callback: Union[Callable, None] = None,
+    background_color: List[int] = None,
 ):
     if not test_iterations:
         test_iterations = [
@@ -398,6 +404,7 @@ def run_with_parser(
         args.start_checkpoint,
         args.debug_from,
         epoch_callback,
+        background_color,
     )
 
     # All done
