@@ -3,4 +3,4 @@
 	url = git@github.com:mjkaufer/simple-knn.git
 [submodule "submodules/diff-gaussian-rasterization"]
 	path = submodules/diff-gaussian-rasterization
-	url = https://github.com/mjkaufer/diff-gaussian-rasterization
+	url = git@github.com:mjkaufer/diff-gaussian-rasterization.git
