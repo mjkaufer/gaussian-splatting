@@ -23,7 +23,6 @@ from tqdm import tqdm
 from utils.image_utils import psnr
 from argparse import ArgumentParser, Namespace
 from arguments import ModelParams, PipelineParams, OptimizationParams
-from threading import Thread
 
 try:
     from torch.utils.tensorboard import SummaryWriter
@@ -62,6 +61,7 @@ def training(
     viewpoint_stack = None
     ema_loss_for_log = 0.0
     progress_bar = tqdm(range(first_iter, opt.iterations), desc="Training progress")
+    print("OPT ITERATIONS IS", opt.iterations)
     first_iter += 1
     for iteration in range(first_iter, opt.iterations + 1):
         if network_gui.conn == None:
@@ -201,16 +201,18 @@ def training(
                         iteration, checkpoint_out
                     )
                 )
+
                 torch.save(
                     (gaussians.capture(), iteration),
                     checkpoint_out,
                 )
+
                 if epoch_callback:
-                    callback_thread = Thread(
-                        target=epoch_callback,
-                        args=(checkpoint_out, iteration),
-                    )
-                    callback_thread.start()
+                    print(f"Executing epoch callback for {iteration}...")
+                    epoch_callback(checkpoint_out, iteration)
+                    print(f"Done with epoch callback for {iteration}...")
+                else:
+                    print("No epoch callback provided :(")
 
 
 def prepare_output_and_logger(args):
@@ -333,7 +335,9 @@ def run_with_parser(
     parser = ArgumentParser(description="Training script parameters")
     lp = ModelParams(parser)
     op = OptimizationParams(parser)
+
     op.iterations = iterations[-1]
+
     pp = PipelineParams(parser)
     parser.add_argument("--ip", type=str, default="127.0.0.1")
     parser.add_argument("--port", type=int, default=6009)
