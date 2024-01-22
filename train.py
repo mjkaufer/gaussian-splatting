@@ -208,13 +208,13 @@ def run_with_parser(input_path: Union[str, None] = None, output_path: Union[str,
     parser.add_argument("--start_checkpoint", type=str, default = None)
     args_list = [
         *sys.argv[1:],
-        f"-s {input_path}" if input_path else "",
-        f"-m {output_path}" if output_path else "",
+        *(["-s", input_path] if input_path else []),
+        *(["-m", output_path] if output_path else []),
     ]
-    args_str = " ".join([arg for arg in args_list if len(arg) > 0]).strip()
+    args_list = [arg for arg in args_list if len(arg) > 0]
 
     args = parser.parse_args(
-        args_str
+        args_list
     )
 
     args.save_iterations.append(args.iterations)
