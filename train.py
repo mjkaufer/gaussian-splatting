@@ -207,7 +207,7 @@ def run_with_parser(input_path: Union[str, None] = None, output_path: Union[str,
     parser.add_argument("--checkpoint_iterations", nargs="+", type=int, default=[])
     parser.add_argument("--start_checkpoint", type=str, default = None)
     args_list = [
-        sys.argv[1:],
+        *sys.argv[1:],
         f"-s {input_path}" if input_path else "",
         f"-m {output_path}" if output_path else "",
     ]
