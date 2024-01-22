@@ -357,7 +357,7 @@ def run_with_parser(
 
     args = parser.parse_args(args_list)
 
-    args.save_iterations.append(args.iterations)
+    # args.save_iterations.append(args.iterations)
 
     print("Optimizing " + args.model_path)
 
@@ -371,7 +371,7 @@ def run_with_parser(
     print("STARTING TRAINING\n")
     opt = op.extract(args)
     opt.iterations = iterations[-1]
-    
+
     training(
         lp.extract(args),
         opt,
