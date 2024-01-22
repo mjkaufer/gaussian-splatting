@@ -43,7 +43,9 @@ def training(
     debug_from,
     epoch_callback,
 ):
-    print("Iterations are", testing_iterations, saving_iterations, checkpoint_iterations)
+    print(
+        "Iterations are", testing_iterations, saving_iterations, checkpoint_iterations
+    )
     first_iter = 0
     tb_writer = prepare_output_and_logger(dataset)
     gaussians = GaussianModel(dataset.sh_degree)
@@ -159,7 +161,13 @@ def training(
             )
             if iteration in saving_iterations:
                 print("\n[ITER {}] Saving Gaussians".format(iteration))
-                scene.save(iteration)
+                save_folder = scene.save(iteration)
+                if epoch_callback:
+                    print(f"Executing epoch callback for {iteration} in folder {save_folder}...")
+                    epoch_callback(save_folder, iteration)
+                    print(f"Done with epoch callback for {iteration} in folder {save_folder}...")
+                else:
+                    print("No epoch callback provided :(")
 
             # Densification
             if iteration < opt.densify_until_iter:
@@ -195,8 +203,11 @@ def training(
                 gaussians.optimizer.step()
                 gaussians.optimizer.zero_grad(set_to_none=True)
 
+            # Actually don't care about this in the traditional sense
             if iteration in checkpoint_iterations:
-                checkpoint_out = os.path.join(scene.model_path, "chkpnt" + str(iteration) + ".pth")
+                checkpoint_out = os.path.join(
+                    scene.model_path, "chkpnt" + str(iteration) + ".pth"
+                )
                 print(
                     "\n[ITER {}] Saving Checkpoint to {}".format(
                         iteration, checkpoint_out
@@ -207,13 +218,6 @@ def training(
                     (gaussians.capture(), iteration),
                     checkpoint_out,
                 )
-
-                if epoch_callback:
-                    print(f"Executing epoch callback for {iteration}...")
-                    epoch_callback(checkpoint_out, iteration)
-                    print(f"Done with epoch callback for {iteration}...")
-                else:
-                    print("No epoch callback provided :(")
 
 
 def prepare_output_and_logger(args):
@@ -327,27 +331,39 @@ def training_report(
 def run_with_parser(
     input_path: Union[str, None] = None,
     output_path: Union[str, None] = None,
-    iterations: List[int] = [1_000, 2_000, 3_000, 4_000, 5_000],
+    save_iterations: List[int] = [1_000, 2_000, 3_000, 4_000, 5_000],
+    test_iterations: List[int] = None,
     # args are (file_name, epoch_num)
     epoch_callback: Union[Callable, None] = None,
 ):
+    if not test_iterations:
+        test_iterations = [
+            save_iterations[i]
+            for i in range(len(save_iterations))
+            if i % 2 == 0 or i == len(save_iterations) - 1
+        ]
+
     # TODO: Clean up this code, is pseudo-bound to arg parser
     # Set up command line argument parser
     parser = ArgumentParser(description="Training script parameters")
     lp = ModelParams(parser)
     op = OptimizationParams(parser)
 
-    op.iterations = iterations[-1]
+    op.iterations = save_iterations[-1]
 
     pp = PipelineParams(parser)
     parser.add_argument("--ip", type=str, default="127.0.0.1")
     parser.add_argument("--port", type=int, default=6009)
     parser.add_argument("--debug_from", type=int, default=-100)
     parser.add_argument("--detect_anomaly", action="store_true", default=False)
-    parser.add_argument("--test_iterations", nargs="+", type=int, default=iterations)
-    parser.add_argument("--save_iterations", nargs="+", type=int, default=iterations)
+    parser.add_argument(
+        "--test_iterations", nargs="+", type=int, default=test_iterations
+    )
+    parser.add_argument(
+        "--save_iterations", nargs="+", type=int, default=save_iterations
+    )
     parser.add_argument("--quiet", action="store_true")
-    parser.add_argument("--checkpoint_iterations", nargs="+", type=int, default=iterations)
+    parser.add_argument("--checkpoint_iterations", nargs="+", type=int, default=[])
     parser.add_argument("--start_checkpoint", type=str, default=None)
     print("INSIDE OF PARSER! input_path=", input_path, "output_path=", output_path)
     args_list = [
@@ -370,7 +386,7 @@ def run_with_parser(
     torch.autograd.set_detect_anomaly(args.detect_anomaly)
     print("STARTING TRAINING\n")
     opt = op.extract(args)
-    opt.iterations = iterations[-1]
+    opt.iterations = save_iterations[-1]
 
     training(
         lp.extract(args),
