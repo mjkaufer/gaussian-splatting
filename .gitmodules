@@ -1,0 +1,6 @@
+[submodule "simple-knn"]
+	path = simple-knn
+	url = https://github.com/mjkaufer/simple-knn
+[submodule "diff-gaussian-rasterization"]
+	path = diff-gaussian-rasterization
+	url = https://github.com/mjkaufer/diff-gaussian-rasterization
