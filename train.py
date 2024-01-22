@@ -206,12 +206,11 @@ def run_with_parser(input_path: Union[str, None] = None, output_path: Union[str,
     parser.add_argument("--quiet", action="store_true")
     parser.add_argument("--checkpoint_iterations", nargs="+", type=int, default=[])
     parser.add_argument("--start_checkpoint", type=str, default = None)
+    print("INSIDE OF PARSER! input_path=", input_path, "output_path=", output_path)
     args_list = [
-        *sys.argv[1:],
         *(["-s", input_path] if input_path else []),
         *(["-m", output_path] if output_path else []),
     ]
-    args_list = [arg for arg in args_list if len(arg) > 0]
 
     args = parser.parse_args(
         args_list
@@ -225,8 +224,10 @@ def run_with_parser(input_path: Union[str, None] = None, output_path: Union[str,
     safe_state(args.quiet)
 
     # Start GUI server, configure and run training
+    # TODO: Maybe disable this?
     network_gui.init(args.ip, args.port)
     torch.autograd.set_detect_anomaly(args.detect_anomaly)
+    print("STARTING TRAINING\n")
     training(lp.extract(args), op.extract(args), pp.extract(args), args.test_iterations, args.save_iterations, args.checkpoint_iterations, args.start_checkpoint, args.debug_from)
 
     # All done
