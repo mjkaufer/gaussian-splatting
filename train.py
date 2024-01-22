@@ -196,7 +196,7 @@ def training(
                 gaussians.optimizer.zero_grad(set_to_none=True)
 
             if iteration in checkpoint_iterations:
-                checkpoint_out = scene.model_path + "/chkpnt" + str(iteration) + ".pth"
+                checkpoint_out = os.path.join(scene.model_path, "chkpnt" + str(iteration) + ".pth")
                 print(
                     "\n[ITER {}] Saving Checkpoint to {}".format(
                         iteration, checkpoint_out
@@ -369,9 +369,12 @@ def run_with_parser(
     network_gui.init(args.ip, args.port)
     torch.autograd.set_detect_anomaly(args.detect_anomaly)
     print("STARTING TRAINING\n")
+    opt = op.extract(args)
+    opt.iterations = iterations[-1]
+    
     training(
         lp.extract(args),
-        op.extract(args),
+        opt,
         pp.extract(args),
         args.test_iterations,
         args.save_iterations,
