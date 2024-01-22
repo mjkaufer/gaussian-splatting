@@ -191,7 +191,7 @@ def training_report(tb_writer, iteration, Ll1, loss, l1_loss, elapsed, testing_i
             tb_writer.add_scalar('total_points', scene.gaussians.get_xyz.shape[0], iteration)
         torch.cuda.empty_cache()
 
-def run_with_parser(input_path: Union[str, None] = None, output_: Union[str, None] = None, iterations: List[int] = [1_000, 2_000, 3_000, 4_000, 5_000]):
+def run_with_parser(input_path: Union[str, None] = None, output_path: Union[str, None] = None, iterations: List[int] = [1_000, 2_000, 3_000, 4_000, 5_000]):
     # Set up command line argument parser
     parser = ArgumentParser(description="Training script parameters")
     lp = ModelParams(parser)
@@ -209,7 +209,7 @@ def run_with_parser(input_path: Union[str, None] = None, output_: Union[str, Non
     args_list = [
         sys.argv[1:],
         f"-s {input_path}" if input_path else "",
-        f"-m {output_}" if output_ else "",
+        f"-m {output_path}" if output_path else "",
     ]
     args_str = " ".join([arg for arg in args_list if len(arg) > 0]).strip()
 
