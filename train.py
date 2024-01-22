@@ -43,6 +43,7 @@ def training(
     debug_from,
     epoch_callback,
 ):
+    print("Iterations are", testing_iterations, saving_iterations, checkpoint_iterations)
     first_iter = 0
     tb_writer = prepare_output_and_logger(dataset)
     gaussians = GaussianModel(dataset.sh_degree)
@@ -346,7 +347,7 @@ def run_with_parser(
     parser.add_argument("--test_iterations", nargs="+", type=int, default=iterations)
     parser.add_argument("--save_iterations", nargs="+", type=int, default=iterations)
     parser.add_argument("--quiet", action="store_true")
-    parser.add_argument("--checkpoint_iterations", nargs="+", type=int, default=[])
+    parser.add_argument("--checkpoint_iterations", nargs="+", type=int, default=iterations)
     parser.add_argument("--start_checkpoint", type=str, default=None)
     print("INSIDE OF PARSER! input_path=", input_path, "output_path=", output_path)
     args_list = [
